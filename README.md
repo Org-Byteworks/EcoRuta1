@@ -1,4 +1,4 @@
-# EcoRuta1
+# EcoRuta
 
 Claudia Urbano 
 
