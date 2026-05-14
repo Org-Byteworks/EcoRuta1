@@ -25,6 +25,7 @@ Backend: Node.js
 Base de datos: MySQL
 
 Claudia Urbano
+
 Lo mejor de EcoRuta es que junta toda la información en una sola pagina. Al saber exactamente a qué hora pasa el camión, 
 la gente ya no saca la basura a ciegas, lo que evita que las esquinas se llenen de bolsas y se contamine el barrio.
 
