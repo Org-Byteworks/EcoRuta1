@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  correo    String   @unique
+  password  String
+  rol       String   @default("usuario")
+  createdAt DateTime @default(now())
+
+  quejas    Queja[]
+}
+
+model Ruta {
+  id        Int      @id @default(autoincrement())
+  origen    String
+  destino   String
+  createdAt DateTime @default(now())
+
+  horarios  Horario[]
+  barrios   Barrio[]
+}
+
+model Horario {
+  id        Int      @id @default(autoincrement())
+  dia       String
+  hora      String
+
+  rutaId    Int
+  ruta      Ruta @relation(fields: [rutaId], references: [id])
+}
+
+model Barrio {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+
+  rutaId    Int
+  ruta      Ruta @relation(fields: [rutaId], references: [id])
+}
+
+model Queja {
+  id          Int      @id @default(autoincrement())
+  titulo      String
+  descripcion String
+  estado      String   @default("Pendiente")
+  createdAt   DateTime @default(now())
+
+  usuarioId   Int
+  usuario     Usuario @relation(fields: [usuarioId], references: [id])
+
+  respuestas  Respuesta[]
+}
+
+model Respuesta {
+  id        Int      @id @default(autoincrement())
+  mensaje   String
+  createdAt DateTime @default(now())
+
+  quejaId   Int
+  queja     Queja @relation(fields: [quejaId], references: [id])
+}
