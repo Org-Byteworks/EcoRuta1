@@ -18,6 +18,17 @@ export class QuejasService {
     });
   }
 
+  // ➕ Nuevo Método: Filtra las quejas pertenecientes a un único usuario particular
+  findByUser(usuarioId: number) {
+    return this.prisma.queja.findMany({
+      where: { usuarioId },
+      include: {
+        usuario: true,
+        respuestas: true,
+      },
+    });
+  }
+
   findOne(id: number) {
     return this.prisma.queja.findUnique({
       where: { id },

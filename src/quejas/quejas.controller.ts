@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { QuejasService } from './quejas.service';
 import { CreateQuejaDto } from './dto/create-queja.dto';
 import { UpdateQuejaDto } from './dto/update-queja.dto';
@@ -12,8 +12,12 @@ export class QuejasController {
     return this.quejasService.create(createQuejaDto);
   }
 
+  // 🔄 Modificado: Ahora recibe filtros opcionales desde el Frontend
   @Get()
-  findAll() {
+  findAll(@Query('usuarioId') usuarioId?: string, @Query('rol') rol?: string) {
+    if (rol === 'usuario' && usuarioId) {
+      return this.quejasService.findByUser(+usuarioId);
+    }
     return this.quejasService.findAll();
   }
 
