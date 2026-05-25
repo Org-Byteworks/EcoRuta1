@@ -1,54 +1,71 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async register(data: any) {
-    const hash = await bcrypt.hash(data.password, 10);
-
-    return this.prisma.usuario.create({
-      data: { ...data, password: hash },
+  // 🟢 REGISTER
+  async register(dto: RegisterDto) {
+    const exists = await this.prisma.usuario.findUnique({
+      where: { correo: dto.correo },
     });
-  }
 
-  async login(correo: string, password: string) {
-    // 🔑 1. Crear automáticamente al administrador si ingresa las credenciales maestras y no existe
-    if (correo === 'admin@ecoruta.com') {
-      const adminExiste = await this.prisma.usuario.findUnique({ where: { correo } });
-      
-      if (!adminExiste) {
-        const hashContrasena = await bcrypt.hash('admin2026', 10);
-        await this.prisma.usuario.create({
-          data: {
-            nombre: 'Administrador EcoRuta',
-            correo: 'admin@ecoruta.com',
-            password: hashContrasena,
-            rol: 'ADMIN', // Asigna el rol administrativo para habilitar el menú visual
-          },
-        });
-        console.log('🌱 Administrador maestro inicializado en la base de datos.');
-      }
+    if (exists) {
+      throw new ConflictException('El correo ya está registrado');
     }
 
-    // 🔍 2. Proceso de autenticación normal en la base de datos
-    const user = await this.prisma.usuario.findUnique({ where: { correo } });
+    const hashed = await bcrypt.hash(dto.password, 10);
 
-    if (!user) throw new UnauthorizedException('No existe usuario');
+    const user = await this.prisma.usuario.create({
+      data: {
+        nombre: dto.nombre,
+        correo: dto.correo,
+        password: hashed,
+      },
+    });
 
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) throw new UnauthorizedException('Password incorrecta');
-
-    // 🎫 3. Retornar el token JWT incluyendo los datos de rol y ID
-    return {
-      token: this.jwt.sign({ id: user.id, rol: user.rol }),
-    };
+    const { password, ...result } = user;
+    return result;
   }
+
+  // LOGIN
+async login(dto: LoginDto) {
+  // Buscar usuario por correo
+  const user = await this.prisma.usuario.findUnique({
+    where: { correo: dto.correo },
+  });
+
+  // Validar si existe el usuario
+  if (!user) {
+    throw new UnauthorizedException('Credenciales inválidas');
+  }
+
+  // Validar contraseña
+  const valid = await bcrypt.compare(dto.password, user.password);
+
+  if (!valid) {
+    throw new UnauthorizedException('Credenciales inválidas');
+  }
+
+  // Payload del token JWT
+  const payload = {
+    sub: user.id,
+    correo: user.correo,
+    nombre: user.nombre,
+    rol: user.rol,
+  };
+
+  // Retornar token
+  return {
+    access_token: this.jwtService.sign(payload),
+  };
 }
+};

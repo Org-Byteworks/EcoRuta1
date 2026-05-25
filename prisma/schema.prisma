@@ -71,3 +71,5 @@ model Respuesta {
   quejaId   Int
   queja     Queja @relation(fields: [quejaId], references: [id])
 }
+
+
