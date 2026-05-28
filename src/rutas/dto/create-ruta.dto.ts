@@ -1,11 +1,16 @@
-import { IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class CreateRutaDto {
 
-@IsString()
-origen: string;
+  @IsString()
+  @IsNotEmpty()
+  origen: string;
 
-@IsString()
-destino: string;
+  @IsString()
+  @IsNotEmpty()
+  destino: string;
 
 }

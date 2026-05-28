@@ -1,5 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+
 import { DashboardService } from './dashboard.service';
+
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -8,9 +15,12 @@ export class DashboardController {
     private readonly dashboardService: DashboardService,
   ) {}
 
+  // ======================================
+  // DASHBOARD ADMIN
+  // ======================================
+  @UseGuards(JwtAuthGuard)
   @Get()
   getStats() {
     return this.dashboardService.getStats();
   }
-
 }

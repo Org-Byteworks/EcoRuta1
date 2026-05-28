@@ -10,74 +10,72 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { QuejasService } from './quejas.service';
+import { VehiculosService } from './vehiculos.service';
 
-import { CreateQuejaDto } from './dto/create-queja.dto';
-import { UpdateQuejaDto } from './dto/update-queja.dto';
+import { CreateVehiculoDto } from './dto/create-vehiculo.dto';
+import { UpdateVehiculoDto } from './dto/update-vehiculo.dto';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('quejas')
-export class QuejasController {
+@Controller('vehiculos')
+export class VehiculosController {
 
   constructor(
-    private readonly quejasService: QuejasService,
+    private readonly vehiculosService: VehiculosService,
   ) {}
 
   // ======================================
-  // PÚBLICO: Crear queja/reclamo
+  // ADMIN: Crear vehículo
   // ======================================
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(
     @Body()
-    createQuejaDto: CreateQuejaDto,
+    dto: CreateVehiculoDto,
   ) {
-    return this.quejasService.create(
-      createQuejaDto,
-    );
+    return this.vehiculosService.create(dto);
   }
 
   // ======================================
-  // ADMIN: Ver todas las quejas
+  // PÚBLICO: Ver vehículos
   // ======================================
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
-    return this.quejasService.findAll();
+    return this.vehiculosService.findAll();
   }
 
   // ======================================
-  // ADMIN: Ver una queja
+  // PÚBLICO: Ver un vehículo
   // ======================================
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(
     @Param('id', ParseIntPipe)
     id: number,
   ) {
-    return this.quejasService.findOne(id);
+    return this.vehiculosService.findOne(id);
   }
 
   // ======================================
-  // ADMIN: Actualizar queja
+  // ADMIN: Actualizar vehículo
   // ======================================
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
+
     @Param('id', ParseIntPipe)
     id: number,
 
     @Body()
-    updateQuejaDto: UpdateQuejaDto,
+    dto: UpdateVehiculoDto,
   ) {
-    return this.quejasService.update(
+    return this.vehiculosService.update(
       id,
-      updateQuejaDto,
+      dto,
     );
   }
 
   // ======================================
-  // ADMIN: Eliminar queja
+  // ADMIN: Eliminar vehículo
   // ======================================
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -85,7 +83,7 @@ export class QuejasController {
     @Param('id', ParseIntPipe)
     id: number,
   ) {
-    return this.quejasService.remove(id);
+    return this.vehiculosService.remove(id);
   }
 
 }

@@ -1,24 +1,33 @@
 import {
   Injectable,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
+import { CreateHorarioDto } from './dto/create-horario.dto';
 import { UpdateHorarioDto } from './dto/update-horario.dto';
 
 @Injectable()
 export class HorariosService {
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
 
-  async create(data: any) {
+  // ======================================
+  // Crear horario
+  // ======================================
+  async create(
+    dto: CreateHorarioDto,
+  ) {
 
     // Verificar si la ruta existe
     const rutaExiste =
       await this.prisma.ruta.findUnique({
         where: {
-          id: data.rutaId,
+          id: dto.rutaId,
         },
       });
 
@@ -28,13 +37,13 @@ export class HorariosService {
       );
     }
 
-    // Verificar horario duplicado
+    // Verificar duplicado
     const existe =
       await this.prisma.horario.findFirst({
         where: {
-          dia: data.dia,
-          hora: data.hora,
-          rutaId: data.rutaId,
+          dia: dto.dia,
+          hora: dto.hora,
+          rutaId: dto.rutaId,
         },
       });
 
@@ -44,16 +53,23 @@ export class HorariosService {
       );
     }
 
+    // Crear horario
     return this.prisma.horario.create({
       data: {
-        dia: data.dia,
-        hora: data.hora,
-        rutaId: data.rutaId,
+        dia: dto.dia,
+        hora: dto.hora,
+        rutaId: dto.rutaId,
+      },
+
+      include: {
+        ruta: true,
       },
     });
-
   }
 
+  // ======================================
+  // Obtener todos
+  // ======================================
   findAll() {
 
     return this.prisma.horario.findMany({
@@ -61,19 +77,80 @@ export class HorariosService {
         ruta: true,
       },
     });
-
   }
 
+  // ======================================
+  // Obtener uno
+  // ======================================
+  async findOne(id: number) {
+
+    const horario =
+      await this.prisma.horario.findUnique({
+        where: { id },
+
+        include: {
+          ruta: true,
+        },
+      });
+
+    if (!horario) {
+      throw new NotFoundException(
+        'Horario no encontrado',
+      );
+    }
+
+    return horario;
+  }
+
+  // ======================================
+  // Actualizar
+  // ======================================
   async update(
     id: number,
     dto: UpdateHorarioDto,
   ) {
 
+    const horario =
+      await this.prisma.horario.findUnique({
+        where: { id },
+      });
+
+    if (!horario) {
+      throw new NotFoundException(
+        'Horario no encontrado',
+      );
+    }
+
     return this.prisma.horario.update({
       where: { id },
-      data: dto,
-    });
 
+      data: dto,
+
+      include: {
+        ruta: true,
+      },
+    });
+  }
+
+  // ======================================
+  // Eliminar
+  // ======================================
+  async remove(id: number) {
+
+    const horario =
+      await this.prisma.horario.findUnique({
+        where: { id },
+      });
+
+    if (!horario) {
+      throw new NotFoundException(
+        'Horario no encontrado',
+      );
+    }
+
+    return this.prisma.horario.delete({
+      where: { id },
+    });
   }
 
 }

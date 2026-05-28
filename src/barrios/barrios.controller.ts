@@ -1,39 +1,84 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+
 import { BarriosService } from './barrios.service';
+
 import { CreateBarrioDto } from './dto/create-barrio.dto';
 import { UpdateBarrioDto } from './dto/update-barrio.dto';
 
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 @Controller('barrios')
 export class BarriosController {
-  constructor(private readonly barriosService: BarriosService) {}
+  constructor(
+    private readonly barriosService: BarriosService,
+  ) {}
 
-  // 🔒 OPERACIÓN ADMINISTRATIVA: Creación de nuevos sectores/barrios
+  // ======================================
+  // ADMIN: Crear barrio
+  // ======================================
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createBarrioDto: CreateBarrioDto) {
-    return this.barriosService.create(createBarrioDto);
+  create(
+    @Body() createBarrioDto: CreateBarrioDto,
+  ) {
+    return this.barriosService.create(
+      createBarrioDto,
+    );
   }
 
-  // 🔓 CONSULTA PÚBLICA: Permite ver los barrios y sus rutas asignadas sin iniciar sesión
+  // ======================================
+  // PÚBLICO: Ver todos los barrios
+  // ======================================
   @Get()
   findAll() {
     return this.barriosService.findAll();
   }
 
-  // 🔍 CONSULTA ESPECÍFICA: Obtener los detalles de un solo barrio mediante su ID
+  // ======================================
+  // PÚBLICO: Ver barrio por ID
+  // ======================================
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.barriosService.findOne(+id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.barriosService.findOne(id);
   }
 
-  // 🔒 OPERACIÓN ADMINISTRATIVA: Modificar los parámetros o el estado de un barrio
+  // ======================================
+  // ADMIN: Actualizar barrio
+  // ======================================
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBarrioDto: UpdateBarrioDto) {
-    return this.barriosService.update(+id, updateBarrioDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+
+    @Body()
+    updateBarrioDto: UpdateBarrioDto,
+  ) {
+    return this.barriosService.update(
+      id,
+      updateBarrioDto,
+    );
   }
 
-  // 🔒 OPERACIÓN ADMINISTRATIVA: Eliminar permanentemente un sector del sistema
+  // ======================================
+  // ADMIN: Eliminar barrio
+  // ======================================
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.barriosService.remove(+id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.barriosService.remove(id);
   }
 }

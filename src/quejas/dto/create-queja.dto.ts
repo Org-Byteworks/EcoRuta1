@@ -1,14 +1,30 @@
-import { IsInt, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateQuejaDto {
 
-@IsString()
-titulo: string;
+  @IsString()
+  @IsNotEmpty()
+  nombre: string;
 
-@IsString()
-descripcion: string;
+  @IsEmail()
+  @IsOptional()
+  correo?: string;
 
-@IsInt()
-usuarioId: number;
+  @IsString()
+  @IsOptional()
+  telefono?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  titulo: string;
+
+  @IsString()
+  @IsNotEmpty()
+  descripcion: string;
 
 }

@@ -3,6 +3,7 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,25 +13,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Rol {
+  ADMIN
+}
+
 model Usuario {
   id        Int      @id @default(autoincrement())
   nombre    String
   correo    String   @unique
   password  String
-  rol       String   @default("usuario")
+  rol       Rol      @default(ADMIN)
   createdAt DateTime @default(now())
-
-  quejas    Queja[]
 }
 
 model Ruta {
   id        Int      @id @default(autoincrement())
   origen    String
   destino   String
+  estado    String   @default("Activa")
   createdAt DateTime @default(now())
 
   horarios  Horario[]
   barrios   Barrio[]
+  vehiculos Vehiculo[]
 }
 
 model Horario {
@@ -51,16 +56,17 @@ model Barrio {
 }
 
 model Queja {
-  id          Int      @id @default(autoincrement())
-  titulo      String
-  descripcion String
-  estado      String   @default("Pendiente")
-  createdAt   DateTime @default(now())
+  id                  Int      @id @default(autoincrement())
+  nombre              String
+  correo              String?
+  telefono            String?
+  titulo              String
+  descripcion         String
+  estado              String   @default("Pendiente")
+  codigoSeguimiento   String   @unique
+  createdAt           DateTime @default(now())
 
-  usuarioId   Int
-  usuario     Usuario @relation(fields: [usuarioId], references: [id])
-
-  respuestas  Respuesta[]
+  respuestas          Respuesta[]
 }
 
 model Respuesta {
@@ -72,4 +78,15 @@ model Respuesta {
   queja     Queja @relation(fields: [quejaId], references: [id])
 }
 
+model Vehiculo {
+  id          Int      @id @default(autoincrement())
+  placa       String   @unique
+  tipo        String
+  conductor   String
+  capacidad   String?
+  estado      String   @default("Disponible")
+  createdAt   DateTime @default(now())
 
+  rutaId      Int?
+  ruta        Ruta? @relation(fields: [rutaId], references: [id])
+}

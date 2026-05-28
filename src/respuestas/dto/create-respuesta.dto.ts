@@ -1,11 +1,20 @@
-import { IsInt, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
+
+import { Type } from 'class-transformer';
 
 export class CreateRespuestaDto {
 
-@IsString()
-mensaje: string;
+  @IsString()
+  @IsNotEmpty()
+  mensaje: string;
 
-@IsInt()
-quejaId: number;
+  @Type(() => Number)
+  @IsInt()
+  @IsNotEmpty()
+  quejaId: number;
 
 }
