@@ -47,6 +47,17 @@ export class QuejasController {
   }
 
   // ======================================
+// PÚBLICO: Seguimiento por código
+// ======================================
+@Get('seguimiento/:codigo')
+seguimiento(
+  @Param('codigo')
+  codigo: string,
+) {
+  return this.quejasService.seguimiento(codigo);
+}
+
+  // ======================================
   // ADMIN: Ver una queja
   // ======================================
   @UseGuards(JwtAuthGuard)

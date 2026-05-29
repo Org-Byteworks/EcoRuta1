@@ -81,6 +81,32 @@ export class QuejasService {
   }
 
   // ======================================
+// Seguimiento por código
+// ======================================
+async seguimiento(codigo: string) {
+
+  const queja =
+    await this.prisma.queja.findFirst({
+
+      where: {
+        codigoSeguimiento: codigo,
+      },
+
+      include: {
+        respuestas: true,
+      },
+    });
+
+  if (!queja) {
+    throw new NotFoundException(
+      'Queja no encontrada',
+    );
+  }
+
+  return queja;
+}
+
+  // ======================================
   // Actualizar queja
   // ======================================
   async update(
